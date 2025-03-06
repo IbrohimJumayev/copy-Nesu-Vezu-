@@ -3,13 +3,13 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Nesu Vezu</title>
+    <title>Nesu Vezu - Word Cards</title>
     <style>
       body {
         font-family: Arial, sans-serif;
         background-color: #f5f5f5;
         margin: 0;
-        padding: 20px;
+        padding: 10px;
       }
       .container {
         max-width: 1200px;
@@ -18,29 +18,29 @@
       h1 {
         text-align: center;
         color: #333;
-        margin-bottom: 30px;
+        margin-bottom: 20px;
       }
       .input-area {
         display: flex;
-        margin-bottom: 30px;
+        margin-bottom: 20px;
         justify-content: center;
       }
       #word-input {
-        padding: 10px;
-        font-size: 16px;
+        padding: 8px;
+        font-size: 14px;
         border: 1px solid #ccc;
         border-radius: 4px 0 0 4px;
         width: 70%;
-        max-width: 400px;
+        max-width: 300px;
       }
       #add-button {
-        padding: 10px 20px;
+        padding: 8px 16px;
         background-color: #4caf50;
         color: white;
         border: none;
         border-radius: 0 4px 4px 0;
         cursor: pointer;
-        font-size: 16px;
+        font-size: 14px;
       }
       #add-button:hover {
         background-color: #45a049;
@@ -48,16 +48,16 @@
       .cards-container {
         display: flex;
         flex-wrap: wrap;
-        gap: 20px;
+        gap: 10px;
         justify-content: center;
       }
       .card {
         background-color: white;
         border-radius: 8px;
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        padding: 30px;
-        min-width: 150px;
-        min-height: 100px;
+        padding: 10px;
+        min-width: 80px;
+        min-height: 50px;
         display: flex;
         flex-direction: column;
         justify-content: center;
@@ -71,24 +71,24 @@
         box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
       }
       .card-word {
-        font-size: 24px;
+        font-size: 14px;
         font-weight: bold;
         color: #333;
-        margin-bottom: 10px;
+        margin-bottom: 5px;
       }
       .delete-button {
         position: absolute;
-        top: 8px;
-        right: 8px;
-        width: 24px;
-        height: 24px;
+        top: 5px;
+        right: 5px;
+        width: 18px;
+        height: 18px;
         border-radius: 50%;
         background-color: #ff4d4d;
         color: white;
         display: flex;
         justify-content: center;
         align-items: center;
-        font-size: 14px;
+        font-size: 12px;
         cursor: pointer;
         border: none;
         opacity: 0.7;
@@ -101,9 +101,8 @@
         visibility: hidden;
         background-color: #555;
         color: white;
-        text-align: center;
-        padding: 5px 10px;
-        border-radius: 6px;
+        padding: 3px 6px;
+        border-radius: 4px;
         position: absolute;
         z-index: 1;
         bottom: 110%;
@@ -111,39 +110,17 @@
         transform: translateX(-50%);
         opacity: 0;
         transition: opacity 0.3s;
+        font-size: 12px;
       }
       .card:hover .tooltip {
         visibility: visible;
         opacity: 1;
       }
-      .instructions {
-        text-align: center;
-        margin-bottom: 20px;
-        color: #666;
-      }
-      #temp-textarea {
-        position: absolute;
-        left: -9999px;
-        top: 0;
-        opacity: 0;
-      }
-      .notification {
-        position: fixed;
-        top: 20px;
-        left: 50%;
-        transform: translateX(-50%);
-        background-color: #333;
-        color: white;
-        padding: 10px 20px;
-        border-radius: 4px;
-        z-index: 1000;
-        display: none;
-      }
       .clear-all {
         background-color: #f44336;
         color: white;
         border: none;
-        padding: 8px 16px;
+        padding: 6px 12px;
         border-radius: 4px;
         cursor: pointer;
         margin-top: 20px;
@@ -160,52 +137,33 @@
     <div class="container">
       <h1>Word Cards</h1>
 
-      <div class="instructions">
-        Add words below. Click on any card to copy the word to clipboard. Click
-        the X to delete a card.
-      </div>
-
       <div class="input-area">
         <input type="text" id="word-input" placeholder="Enter a word..." />
         <button id="add-button">Add</button>
       </div>
 
-      <div class="cards-container" id="cards-container">
-        <!-- Cards will be added here -->
-      </div>
+      <div class="cards-container" id="cards-container"></div>
 
       <button id="clear-all" class="clear-all">Clear All Words</button>
     </div>
-
-    <!-- Hidden textarea for fallback copy method -->
-    <textarea id="temp-textarea"></textarea>
-
-    <!-- Notification for successful copy -->
-    <div id="notification" class="notification">Copied to clipboard!</div>
 
     <script>
       document.addEventListener("DOMContentLoaded", function () {
         const wordInput = document.getElementById("word-input");
         const addButton = document.getElementById("add-button");
         const cardsContainer = document.getElementById("cards-container");
-        const tempTextarea = document.getElementById("temp-textarea");
-        const notification = document.getElementById("notification");
         const clearAllButton = document.getElementById("clear-all");
 
-        // Load saved words from localStorage
         loadSavedWords();
 
-        // Add a new word when button is clicked
         addButton.addEventListener("click", addWordCard);
 
-        // Allow pressing Enter to add a word
         wordInput.addEventListener("keypress", function (e) {
           if (e.key === "Enter") {
             addWordCard();
           }
         });
 
-        // Clear all words
         clearAllButton.addEventListener("click", function () {
           if (confirm("Are you sure you want to delete all words?")) {
             localStorage.removeItem("wordCards");
@@ -235,7 +193,6 @@
           const deleteButton = document.createElement("button");
           deleteButton.className = "delete-button";
           deleteButton.innerHTML = "×";
-          deleteButton.setAttribute("title", "Delete card");
 
           const tooltip = document.createElement("span");
           tooltip.className = "tooltip";
@@ -245,69 +202,22 @@
           card.appendChild(deleteButton);
           card.appendChild(tooltip);
 
-          // Delete button event - stop propagation to prevent card click
           deleteButton.addEventListener("click", function (e) {
             e.stopPropagation();
             card.remove();
             saveWords();
           });
 
-          // Card click to copy text
           card.addEventListener("click", function () {
-            copyToClipboard(word);
-            tooltip.textContent = "Copied!";
-            setTimeout(() => {
-              tooltip.textContent = "Click to copy";
-            }, 2000);
+            navigator.clipboard.writeText(word).then(() => {
+              tooltip.textContent = "Copied!";
+              setTimeout(() => {
+                tooltip.textContent = "Click to copy";
+              }, 1500);
+            });
           });
 
           cardsContainer.appendChild(card);
-        }
-
-        function copyToClipboard(text) {
-          // Try the modern Clipboard API first
-          if (navigator.clipboard && window.isSecureContext) {
-            navigator.clipboard
-              .writeText(text)
-              .then(() => showNotification())
-              .catch((err) => {
-                console.error("Clipboard API failed: ", err);
-                fallbackCopyToClipboard(text);
-              });
-          } else {
-            // Fall back to older method for non-secure contexts
-            fallbackCopyToClipboard(text);
-          }
-        }
-
-        function fallbackCopyToClipboard(text) {
-          // Fallback method using document.execCommand
-          tempTextarea.value = text;
-          tempTextarea.select();
-          tempTextarea.setSelectionRange(0, 99999); // For mobile devices
-
-          try {
-            const successful = document.execCommand("copy");
-            if (successful) {
-              showNotification();
-            } else {
-              console.error("Fallback copy failed");
-              alert("Copy failed. Please try again or copy manually: " + text);
-            }
-          } catch (err) {
-            console.error("Fallback copy error: ", err);
-            alert("Copy failed. Please try again or copy manually: " + text);
-          }
-
-          // Remove focus from textarea
-          document.getSelection().removeAllRanges();
-        }
-
-        function showNotification() {
-          notification.style.display = "block";
-          setTimeout(() => {
-            notification.style.display = "none";
-          }, 2000);
         }
 
         function saveWords() {
@@ -319,20 +229,8 @@
         }
 
         function loadSavedWords() {
-          let savedWords = JSON.parse(
-            localStorage.getItem("wordCards") || "[]"
-          );
-
-          if (savedWords.length > 0) {
-            savedWords.forEach((word) => {
-              createWordCard(word);
-            });
-          } else {
-            // Add some example words if there are no saved words
-            const exampleWords = ["Hello", "World", "Example", "Click Me"];
-            exampleWords.forEach((word) => createWordCard(word));
-            saveWords(); // Save the example words
-          }
+          const savedWords = JSON.parse(localStorage.getItem("wordCards") || "[]");
+          savedWords.forEach((word) => createWordCard(word));
         }
       });
     </script>
