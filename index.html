@@ -3,13 +3,13 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Nesu Vezu - Word Cards</title>
+    <title>Draggable Word Cards</title>
     <style>
       body {
         font-family: Arial, sans-serif;
         background-color: #f5f5f5;
         margin: 0;
-        padding: 10px;
+        padding: 20px;
       }
       .container {
         max-width: 1200px;
@@ -62,9 +62,10 @@
         flex-direction: column;
         justify-content: center;
         align-items: center;
-        cursor: pointer;
+        cursor: move;
         transition: transform 0.2s, box-shadow 0.2s;
         position: relative;
+        user-select: none;
       }
       .card:hover {
         transform: translateY(-5px);
@@ -97,25 +98,6 @@
       .delete-button:hover {
         opacity: 1;
       }
-      .tooltip {
-        visibility: hidden;
-        background-color: #555;
-        color: white;
-        padding: 3px 6px;
-        border-radius: 4px;
-        position: absolute;
-        z-index: 1;
-        bottom: 110%;
-        left: 50%;
-        transform: translateX(-50%);
-        opacity: 0;
-        transition: opacity 0.3s;
-        font-size: 12px;
-      }
-      .card:hover .tooltip {
-        visibility: visible;
-        opacity: 1;
-      }
       .clear-all {
         background-color: #f44336;
         color: white;
@@ -131,11 +113,14 @@
       .clear-all:hover {
         background-color: #d32f2f;
       }
+      .dragging {
+        opacity: 0.5;
+      }
     </style>
   </head>
   <body>
     <div class="container">
-      <h1>Word Cards</h1>
+      <h1>Draggable Word Cards</h1>
 
       <div class="input-area">
         <input type="text" id="word-input" placeholder="Enter a word..." />
@@ -157,7 +142,6 @@
         loadSavedWords();
 
         addButton.addEventListener("click", addWordCard);
-
         wordInput.addEventListener("keypress", function (e) {
           if (e.key === "Enter") {
             addWordCard();
@@ -185,39 +169,59 @@
           const card = document.createElement("div");
           card.className = "card";
           card.setAttribute("data-word", word);
+          card.setAttribute("draggable", "true");
 
-          const wordElement = document.createElement("div");
-          wordElement.className = "card-word";
-          wordElement.textContent = word;
+          card.innerHTML = `
+            <div class="card-word">${word}</div>
+            <button class="delete-button">×</button>
+          `;
 
-          const deleteButton = document.createElement("button");
-          deleteButton.className = "delete-button";
-          deleteButton.innerHTML = "×";
-
-          const tooltip = document.createElement("span");
-          tooltip.className = "tooltip";
-          tooltip.textContent = "Click to copy";
-
-          card.appendChild(wordElement);
-          card.appendChild(deleteButton);
-          card.appendChild(tooltip);
-
-          deleteButton.addEventListener("click", function (e) {
+          card.querySelector(".delete-button").addEventListener("click", (e) => {
             e.stopPropagation();
             card.remove();
             saveWords();
           });
 
-          card.addEventListener("click", function () {
-            navigator.clipboard.writeText(word).then(() => {
-              tooltip.textContent = "Copied!";
-              setTimeout(() => {
-                tooltip.textContent = "Click to copy";
-              }, 1500);
-            });
+          card.addEventListener("dragstart", () => {
+            card.classList.add("dragging");
+          });
+
+          card.addEventListener("dragend", () => {
+            card.classList.remove("dragging");
+            saveWords();
           });
 
           cardsContainer.appendChild(card);
+        }
+
+        cardsContainer.addEventListener("dragover", (e) => {
+          e.preventDefault();
+          const draggingCard = document.querySelector(".dragging");
+          const afterElement = getDragAfterElement(cardsContainer, e.clientX);
+          if (afterElement == null) {
+            cardsContainer.appendChild(draggingCard);
+          } else {
+            cardsContainer.insertBefore(draggingCard, afterElement);
+          }
+        });
+
+        function getDragAfterElement(container, x) {
+          const draggableElements = [
+            ...container.querySelectorAll(".card:not(.dragging)"),
+          ];
+
+          return draggableElements.reduce(
+            (closest, child) => {
+              const box = child.getBoundingClientRect();
+              const offset = x - box.left - box.width / 2;
+              if (offset < 0 && offset > closest.offset) {
+                return { offset: offset, element: child };
+              } else {
+                return closest;
+              }
+            },
+            { offset: Number.NEGATIVE_INFINITY }
+          ).element;
         }
 
         function saveWords() {
